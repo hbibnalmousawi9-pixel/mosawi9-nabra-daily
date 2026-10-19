@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nabra Finance Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-white transition-colors duration-200">
+
+    <div id="app" class="min-h-full flex flex-col">
+        <!-- Top Navigation -->
+        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-xs transition-colors duration-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                        <i class="fa-solid fa-chart-pie text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-slate-900 dark:text-white tracking-tight text-lg">Nabra Finance</h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Multi-Business Command Center</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-1 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl text-sm font-medium">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-4 py-2 rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Dashboard</button>
+                    <button onclick="switchTab('revenue')" id="nav-revenue" class="px-4 py-2 rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Revenue Log</button>
+                    <button onclick="switchTab('expenses')" id="nav-expenses" class="px-4 py-2 rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Direct Expenses</button>
+                    <button onclick="switchTab('shared')" id="nav-shared" class="px-4 py-2 rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Shared Costs</button>
+                    <button onclick="switchTab('settings')" id="nav-settings" class="px-4 py-2 rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Settings</button>
+                </nav>
+
+                <!-- Auth, Theme Toggle & Profile -->
+                <div class="flex items-center space-x-3">
+                    <!-- Theme Toggle Button -->
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Toggle Light/Dark Theme">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <div id="auth-container">
+                        <button onclick="handleGoogleLogin()" class="flex items-center space-x-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-100 font-medium px-4 py-2 rounded-xl text-sm shadow-xs transition-all">
+                            <i class="fa-brands fa-google text-red-500"></i>
+                            <span>Sign in with Google</span>
+                        </button>
+                    </div>
+                    <div id="user-profile" class="hidden flex items-center space-x-3">
+                        <img id="user-avatar" src="" alt="Avatar" class="w-9 h-9 rounded-full ring-2 ring-brand-500/30">
+                        <div class="hidden sm:block text-left">
+                            <p id="user-name" class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[120px]"></p>
+                            <span class="inline-flex items-center text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> Cloud Synced</span>
+                        </div>
+                        <button onclick="handleLogout()" title="Sign Out" class="text-slate-400 hover:text-rose-600 p-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Mobile Navigation -->
+            <div class="flex md:hidden bg-slate-100 dark:bg-slate-800 p-1 border-t border-slate-200 dark:border-slate-700 overflow-x-auto space-x-1">
+                <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="flex-1 py-2 text-xs font-medium text-center rounded-lg text-slate-600 dark:text-slate-300">Dashboard</button>
+                <button onclick="switchTab('revenue')" id="mob-nav-revenue" class="flex-1 py-2 text-xs font-medium text-center rounded-lg text-slate-600 dark:text-slate-300">Revenue</button>
+                <button onclick="switchTab('expenses')" id="mob-nav-expenses" class="flex-1 py-2 text-xs font-medium text-center rounded-lg text-slate-600 dark:text-slate-300">Expenses</button>
+                <button onclick="switchTab('shared')" id="mob-nav-shared" class="flex-1 py-2 text-xs font-medium text-center rounded-lg text-slate-600 dark:text-slate-300">Shared</button>
+                <button onclick="switchTab('settings')" id="mob-nav-settings" class="flex-1 py-2 text-xs font-medium text-center rounded-lg text-slate-600 dark:text-slate-300">Settings</button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="space-y-6">
+                <!-- Month Filter & Overview Bar -->
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Financial Command Center</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Track profits across Service 1, Service 2, and Academy instantly.</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Report Month:</label>
+                        <input type="month" id="dash-month" onchange="renderDashboard()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                    </div>
+                </div>
+
+                <!-- High-level Metric Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Total Revenue</span>
+                            <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        </div>
+                        <h3 id="stat-total-revenue" class="text-2xl font-black text-slate-900 dark:text-white">0 DA</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">From all 3 businesses combined</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Total Expenses</span>
+                            <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                        </div>
+                        <h3 id="stat-total-expenses" class="text-2xl font-black text-slate-900 dark:text-white">0 DA</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Direct costs + worker + shared</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Net Profit</span>
+                            <div id="stat-profit-icon-bg" class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 flex items-center justify-center"><i class="fa-solid fa-wallet"></i></div>
+                        </div>
+                        <h3 id="stat-net-profit" class="text-2xl font-black text-slate-900 dark:text-white">0 DA</h3>
+                        <p id="stat-profit-status" class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1">Status: Healthy</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Top Performing</span>
+                            <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center"><i class="fa-solid fa-trophy"></i></div>
+                        </div>
+                        <h3 id="stat-top-business" class="text-xl font-black text-slate-900 dark:text-white truncate">--</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Highest net margin</p>
+                    </div>
+                </div>
+
+                <!-- Company Breakdown Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="company-cards-grid">
+                    <!-- Dynamic Service 1, Service 2, Academy Cards -->
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-4">Revenue vs Expenses by Business</h3>
+                        <div class="h-64 relative">
+                            <canvas id="chartRevenueVsExpense"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-4">Net Profit Distribution</h3>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="chartProfitShare"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: REVENUE LOG -->
+            <div id="view-revenue" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Revenue Log</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Record every client payment or income transaction.</p>
+                    </div>
+                    <button onclick="openModal('revenue')" class="bg-brand-500 hover:bg-brand-600 text-white font-medium px-4 py-2.5 rounded-xl text-sm shadow-sm transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Payment</span>
+                    </button>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Company</th>
+                                    <th class="p-4">Reason / Order</th>
+                                    <th class="p-4 text-right">Amount (DA)</th>
+                                    <th class="p-4">Notes</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-revenue-body" class="divide-y divide-slate-100 dark:divide-slate-700">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: BUSINESS EXPENSES -->
+            <div id="view-expenses" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Business Direct Expenses</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Costs assigned specifically to one company (DZD or USD).</p>
+                    </div>
+                    <button onclick="openModal('expense')" class="bg-brand-500 hover:bg-brand-600 text-white font-medium px-4 py-2.5 rounded-xl text-sm shadow-sm transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Direct Expense</span>
+                    </button>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Company</th>
+                                    <th class="p-4">Reason / Category</th>
+                                    <th class="p-4 text-right">Amount (DA)</th>
+                                    <th class="p-4 text-right">Amount (USD)</th>
+                                    <th class="p-4 text-right">Total (DA)</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-expenses-body" class="divide-y divide-slate-100 dark:divide-slate-700">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: SHARED EXPENSES -->
+            <div id="view-shared" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Shared Expenses</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Costs shared equally across all active businesses.</p>
+                    </div>
+                    <button onclick="openModal('shared')" class="bg-brand-500 hover:bg-brand-600 text-white font-medium px-4 py-2.5 rounded-xl text-sm shadow-sm transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Shared Cost</span>
+                    </button>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Reason</th>
+                                    <th class="p-4 text-right">Amount (DA)</th>
+                                    <th class="p-4 text-right">Amount (USD)</th>
+                                    <th class="p-4 text-right">Total (DA)</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-shared-body" class="divide-y divide-slate-100 dark:divide-slate-700">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: SETTINGS -->
+            <div id="view-settings" class="hidden space-y-6 max-w-2xl mx-auto">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Engine Settings</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Configure default currency rates and daily worker costs.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">USD to DZD Exchange Rate</label>
+                            <input type="number" id="setting-usd-rate" value="135" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Daily Worker Cost per Company (DA)</label>
+                            <input type="number" id="setting-worker-cost" value="1000" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Number of Shared Companies</label>
+                            <input type="number" id="setting-companies-count" value="3" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                        </div>
+
+                        <button onclick="saveSettings()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-medium py-3 rounded-xl text-sm shadow-md transition-all">
+                            Save Engine Settings
+                        </button>
+                    </div>
+
+                    <!-- Backup & Download Section -->
+                    <div class="pt-6 border-t border-slate-200 dark:border-slate-700">
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Data Backup & Export</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Export all logged revenue, expenses, and settings to a JSON file.</p>
+                        <button onclick="exportJSON()" class="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-download"></i>
+                            <span>Download Database Backup (.JSON)</span>
+                        </button>
+                    </div>
+
+                    <!-- Danger Zone / Delete Database Section -->
+                    <div class="pt-6 border-t border-rose-100 dark:border-rose-900/50">
+                        <h3 class="font-bold text-rose-600 dark:text-rose-400 mb-1">Danger Zone</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Permanently clear all financial records from the cloud database.</p>
+                        <button onclick="openDeleteModal()" class="bg-rose-50 border border-rose-200 hover:bg-rose-100 dark:bg-rose-950/30 dark:border-rose-900 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 font-medium px-4 py-2.5 rounded-xl text-sm transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>Delete All Database Records</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- UNIVERSAL INPUT MODAL -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-700 space-y-6">
+            <div class="flex items-center justify-between">
+                <h3 id="modal-title" class="font-bold text-lg text-slate-900 dark:text-white">Add Entry</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="modal-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="modal-type" value="">
+                
+                <div id="field-date">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Date</label>
+                    <input type="date" id="input-date" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                </div>
+
+                <div id="field-company">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Company</label>
+                    <select id="input-company" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                        <option value="Service 1">Service 1</option>
+                        <option value="Service 2">Service 2</option>
+                        <option value="Academy">Academy</option>
+                    </select>
+                </div>
+
+                <div id="field-reason">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1" id="label-reason-text">Reason / Description</label>
+                    <input type="text" id="input-reason" placeholder="e.g. Video order #104" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3" id="field-amounts">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1" id="label-amt-da">Amount (DA)</label>
+                        <input type="number" step="any" id="input-da" value="0" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                    </div>
+                    <div id="wrapper-usd">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Amount ($ USD)</label>
+                        <input type="number" step="any" id="input-usd" value="0" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                    </div>
+                </div>
+
+                <div id="field-notes">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Notes (Optional)</label>
+                    <input type="text" id="input-notes" placeholder="Client details, invoice ref..." class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                </div>
+
+                <button type="submit" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-medium py-3 rounded-xl text-sm shadow-md transition-all">
+                    Save Transaction
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION / DELETE MODAL -->
+    <div id="delete-modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 dark:border-rose-900 space-y-5">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="text-center space-y-2">
+                <h3 class="font-bold text-lg text-slate-900 dark:text-white">Delete All Database Records?</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">This action cannot be undone. All revenue logs, expenses, and shared costs will be permanently removed.</p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 text-center uppercase">Type "DELETE" below to confirm</label>
+                <input type="text" id="input-confirm-delete" oninput="checkDeleteInput()" placeholder="DELETE" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-center font-bold tracking-widest rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 outline-none dark:text-white">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="closeDeleteModal()" class="w-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium py-2.5 rounded-xl text-sm transition-all">
+                    Cancel
+                </button>
+                <button id="btn-confirm-delete" disabled onclick="executeDatabasePurge()" class="w-full bg-rose-600 opacity-50 cursor-not-allowed hover:bg-rose-700 text-white font-medium py-2.5 rounded-xl text-sm transition-all shadow-md">
+                    Purge All Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK v11 Modular & App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your exact Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCvnTyiSaYNxPxTzfFbbG9KAp-7L6M6LaU",
+            authDomain: "nabra-dziriya.firebaseapp.com",
+            projectId: "nabra-dziriya",
+            storageBucket: "nabra-dziriya.firebasestorage.app",
+            messagingSenderId: "768149655276",
+            appId: "1:768149655276:web:aca62068ef20ee03715fc9",
+            measurementId: "G-QH3WEKYQN7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Theme Setup
+        window.toggleDarkMode = () => {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = "fa-solid fa-moon";
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                icon.className = "fa-solid fa-sun text-amber-400";
+                localStorage.setItem('theme', 'dark');
+            }
+            refreshUI();
+        };
+
+        // Initialize Theme from Saved Preference or Default to Light
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('theme-icon').className = "fa-solid fa-sun text-amber-400";
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.getElementById('theme-icon').className = "fa-solid fa-moon";
+        }
+
+        // Global State
+        window.appState = {
+            currentUser: null,
+            currentTab: 'dashboard',
+            revenue: [],
+            expenses: [],
+            shared: [],
+            settings: { usdRate: 135, workerCost: 1000, companiesCount: 3 }
+        };
+
+        let charts = {};
+
+        // Expose Firebase tools globally
+        window.handleGoogleLogin = async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                console.error("Login failed:", err);
+                alert("Google Sign-in failed: " + err.message);
+            }
+        };
+
+        window.handleLogout = async () => {
+            await signOut(auth);
+            window.location.reload();
+        };
+
+        // Auth Observer
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.appState.currentUser = user;
+                document.getElementById('auth-container').classList.add('hidden');
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('user-name').innerText = user.displayName || user.email;
+                if (user.photoURL) document.getElementById('user-avatar').src = user.photoURL;
+                
+                initFirestoreListeners(user.uid);
+            } else {
+                try {
+                    await signInAnonymously(auth);
+                } catch (e) {
+                    console.error("Anon auth fallback error", e);
+                }
+            }
+        });
+
+        function getCollectionPath(userId, subcol) {
+            return collection(db, 'artifacts', 'nabra-finance-v1', 'users', userId, subcol);
+        }
+
+        function initFirestoreListeners(userId) {
+            // Revenue
+            onSnapshot(getCollectionPath(userId, 'revenue'), (snapshot) => {
+                window.appState.revenue = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+            // Expenses
+            onSnapshot(getCollectionPath(userId, 'expenses'), (snapshot) => {
+                window.appState.expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+            // Shared
+            onSnapshot(getCollectionPath(userId, 'shared'), (snapshot) => {
+                window.appState.shared = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+            // Settings
+            const settingsRef = doc(db, 'artifacts', 'nabra-finance-v1', 'users', userId, 'config', 'settings');
+            onSnapshot(settingsRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    window.appState.settings = docSnap.data();
+                    document.getElementById('setting-usd-rate').value = window.appState.settings.usdRate || 135;
+                    document.getElementById('setting-worker-cost').value = window.appState.settings.workerCost || 1000;
+                    document.getElementById('setting-companies-count').value = window.appState.settings.companiesCount || 3;
+                }
+                refreshUI();
+            });
+        }
+
+        // Tab Switcher
+        window.switchTab = (tabId) => {
+            window.appState.currentTab = tabId;
+            ['dashboard', 'revenue', 'expenses', 'shared', 'settings'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                const navBtn = document.getElementById(`nav-${t}`);
+                const mobBtn = document.getElementById(`mob-nav-${t}`);
+                if (t === tabId) {
+                    if(el) el.classList.remove('hidden');
+                    if(navBtn) navBtn.className = "px-4 py-2 rounded-lg transition-all bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 font-bold shadow-xs";
+                    if(mobBtn) mobBtn.className = "flex-1 py-2 text-xs font-bold text-center rounded-lg bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-xs";
+                } else {
+                    if(el) el.classList.add('hidden');
+                    if(navBtn) navBtn.className = "px-4 py-2 rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white";
+                    if(mobBtn) mobBtn.className = "flex-1 py-2 text-xs font-medium text-center rounded-lg text-slate-600 dark:text-slate-300";
+                }
+            });
+            refreshUI();
+        };
+
+        // Modal Controls
+        window.openModal = (type) => {
+            document.getElementById('modal-type').value = type;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+            
+            const usdWrapper = document.getElementById('wrapper-usd');
+            const companyField = document.getElementById('field-company');
+            
+            if (type === 'revenue') {
+                document.getElementById('modal-title').innerText = "Add Client Payment";
+                companyField.style.display = 'block';
+                usdWrapper.style.display = 'none';
+            } else if (type === 'expense') {
+                document.getElementById('modal-title').innerText = "Add Direct Business Expense";
+                companyField.style.display = 'block';
+                usdWrapper.style.display = 'block';
+            } else if (type === 'shared') {
+                document.getElementById('modal-title').innerText = "Add Shared Company Expense";
+                companyField.style.display = 'none';
+                usdWrapper.style.display = 'block';
+            }
+        };
+
+        window.closeModal = () => {
+            document.getElementById('modal-backdrop').classList.add('hidden');
+            document.getElementById('modal-form').reset();
+        };
+
+        window.handleFormSubmit = async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) return alert("Please sign in first.");
+
+            const type = document.getElementById('modal-type').value;
+            const date = document.getElementById('input-date').value;
+            const reason = document.getElementById('input-reason').value;
+            const da = parseFloat(document.getElementById('input-da').value) || 0;
+            const usd = parseFloat(document.getElementById('input-usd').value) || 0;
+            const notes = document.getElementById('input-notes').value || "";
+            const company = document.getElementById('input-company').value;
+            const usdRate = window.appState.settings.usdRate || 135;
+
+            let colName = '';
+            let payload = {};
+
+            if (type === 'revenue') {
+                colName = 'revenue';
+                payload = { date, company, reason, da, notes, createdAt: Date.now() };
+            } else if (type === 'expense') {
+                colName = 'expenses';
+                const totalDa = da + (usd * usdRate);
+                payload = { date, company, reason, da, usd, totalDa, notes, createdAt: Date.now() };
+            } else if (type === 'shared') {
+                colName = 'shared';
+                const totalDa = da + (usd * usdRate);
+                payload = { date, reason, da, usd, totalDa, createdAt: Date.now() };
+            }
+
+            try {
+                await addDoc(getCollectionPath(user.uid, colName), payload);
+                closeModal();
+            } catch (err) {
+                console.error("Error saving document:", err);
+                alert("Error saving: " + err.message);
+            }
+        };
+
+        window.deleteItem = async (colName, id) => {
+            const user = auth.currentUser;
+            if (!user) return;
+            if (confirm("Are you sure you want to delete this record?")) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', 'nabra-finance-v1', 'users', user.uid, colName, id));
+                } catch(e) {
+                    alert("Delete failed: " + e.message);
+                }
+            }
+        };
+
+        window.saveSettings = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            const usdRate = parseFloat(document.getElementById('setting-usd-rate').value) || 135;
+            const workerCost = parseFloat(document.getElementById('setting-worker-cost').value) || 1000;
+            const companiesCount = parseInt(document.getElementById('setting-companies-count').value) || 3;
+
+            try {
+                const settingsRef = doc(db, 'artifacts', 'nabra-finance-v1', 'users', user.uid, 'config', 'settings');
+                await setDoc(settingsRef, { usdRate, workerCost, companiesCount });
+                alert("Settings saved successfully!");
+            } catch (e) {
+                alert("Failed to save settings: " + e.message);
+            }
+        };
+
+        window.exportJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.appState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `nabra_finance_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        };
+
+        // Database Eraser Modal logic
+        window.openDeleteModal = () => {
+            document.getElementById('delete-modal-backdrop').classList.remove('hidden');
+            document.getElementById('input-confirm-delete').value = '';
+            checkDeleteInput();
+        };
+
+        window.closeDeleteModal = () => {
+            document.getElementById('delete-modal-backdrop').classList.add('hidden');
+        };
+
+        window.checkDeleteInput = () => {
+            const val = document.getElementById('input-confirm-delete').value;
+            const btn = document.getElementById('btn-confirm-delete');
+            if (val.trim() === 'DELETE') {
+                btn.disabled = false;
+                btn.className = "w-full bg-rose-600 hover:bg-rose-700 text-white font-medium py-2.5 rounded-xl text-sm transition-all shadow-md cursor-pointer";
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full bg-rose-600 opacity-50 cursor-not-allowed text-white font-medium py-2.5 rounded-xl text-sm transition-all shadow-md";
+            }
+        };
+
+        window.executeDatabasePurge = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const collectionsToClear = ['revenue', 'expenses', 'shared'];
+                for (const col of collectionsToClear) {
+                    const snap = await getDocs(getCollectionPath(user.uid, col));
+                    for (const docItem of snap.docs) {
+                        await deleteDoc(doc(db, 'artifacts', 'nabra-finance-v1', 'users', user.uid, col, docItem.id));
+                    }
+                }
+                closeDeleteModal();
+                alert("Database has been completely cleared.");
+            } catch (err) {
+                alert("Failed to clear database: " + err.message);
+            }
+        };
+
+        // Render Tables & Dashboard
+        function refreshUI() {
+            renderTables();
+            if (window.appState.currentTab === 'dashboard') {
+                renderDashboard();
+            }
+        }
+
+        function renderTables() {
+            // Revenue Table
+            const revBody = document.getElementById('table-revenue-body');
+            revBody.innerHTML = window.appState.revenue.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(r => `
+                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="p-4 font-medium text-slate-700 dark:text-slate-300">${r.date}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300">${r.company}</span></td>
+                    <td class="p-4 text-slate-800 dark:text-slate-100 font-medium">${r.reason}</td>
+                    <td class="p-4 text-right font-bold text-emerald-600 dark:text-emerald-400">+${r.da.toLocaleString()} DA</td>
+                    <td class="p-4 text-slate-500 dark:text-slate-400 text-xs">${r.notes || '--'}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="deleteItem('revenue', '${r.id}')" class="text-slate-400 hover:text-rose-600 p-1.5"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                </tr>
+            `).join('') || `<tr><td colspan="6" class="p-8 text-center text-slate-400">No client payments logged yet.</td></tr>`;
+
+            // Expenses Table
+            const expBody = document.getElementById('table-expenses-body');
+            expBody.innerHTML = window.appState.expenses.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e => `
+                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="p-4 font-medium text-slate-700 dark:text-slate-300">${e.date}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${e.company}</span></td>
+                    <td class="p-4 text-slate-800 dark:text-slate-100 font-medium">${e.reason}</td>
+                    <td class="p-4 text-right text-slate-600 dark:text-slate-400">${e.da ? e.da.toLocaleString() + ' DA' : '--'}</td>
+                    <td class="p-4 text-right text-slate-600 dark:text-slate-400">${e.usd ? '$' + e.usd.toLocaleString() : '--'}</td>
+                    <td class="p-4 text-right font-bold text-rose-600 dark:text-rose-400">-${e.totalDa.toLocaleString()} DA</td>
+                    <td class="p-4 text-center">
+                        <button onclick="deleteItem('expenses', '${e.id}')" class="text-slate-400 hover:text-rose-600 p-1.5"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                </tr>
+            `).join('') || `<tr><td colspan="7" class="p-8 text-center text-slate-400">No direct business expenses logged yet.</td></tr>`;
+
+            // Shared Table
+            const shaBody = document.getElementById('table-shared-body');
+            shaBody.innerHTML = window.appState.shared.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(s => `
+                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="p-4 font-medium text-slate-700 dark:text-slate-300">${s.date}</td>
+                    <td class="p-4 text-slate-800 dark:text-slate-100 font-medium">${s.reason}</td>
+                    <td class="p-4 text-right text-slate-600 dark:text-slate-400">${s.da ? s.da.toLocaleString() + ' DA' : '--'}</td>
+                    <td class="p-4 text-right text-slate-600 dark:text-slate-400">${s.usd ? '$' + s.usd.toLocaleString() : '--'}</td>
+                    <td class="p-4 text-right font-bold text-amber-600 dark:text-amber-400">-${s.totalDa.toLocaleString()} DA</td>
+                    <td class="p-4 text-center">
+                        <button onclick="deleteItem('shared', '${s.id}')" class="text-slate-400 hover:text-rose-600 p-1.5"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                </tr>
+            `).join('') || `<tr><td colspan="6" class="p-8 text-center text-slate-400">No shared expenses logged yet.</td></tr>`;
+        }
+
+        function renderDashboard() {
+            let monthInput = document.getElementById('dash-month').value;
+            if (!monthInput) {
+                monthInput = new Date().toISOString().slice(0, 7);
+                document.getElementById('dash-month').value = monthInput;
+            }
+
+            const [year, month] = monthInput.split('-');
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const workerCostPerDay = window.appState.settings.workerCost || 1000;
+            const totalMonthlyWorkerCost = daysInMonth * workerCostPerDay;
+            const companies = ['Service 1', 'Service 2', 'Academy'];
+
+            // Filter data for selected month
+            const revMonth = window.appState.revenue.filter(r => r.date && r.date.startsWith(monthInput));
+            const expMonth = window.appState.expenses.filter(e => e.date && e.date.startsWith(monthInput));
+            const shaMonth = window.appState.shared.filter(s => s.date && s.date.startsWith(monthInput));
+
+            let totalRevAll = revMonth.reduce((acc, r) => acc + (r.da || 0), 0);
+            let totalExpDirect = expMonth.reduce((acc, e) => acc + (e.totalDa || 0), 0);
+            let totalSharedAll = shaMonth.reduce((acc, s) => acc + (s.totalDa || 0), 0);
+            let totalWorkerAll = totalMonthlyWorkerCost * companies.length;
+            
+            let totalExpensesAll = totalExpDirect + totalSharedAll + totalWorkerAll;
+            let netProfitAll = totalRevAll - totalExpensesAll;
+
+            document.getElementById('stat-total-revenue').innerText = totalRevAll.toLocaleString() + " DA";
+            document.getElementById('stat-total-expenses').innerText = totalExpensesAll.toLocaleString() + " DA";
+            document.getElementById('stat-net-profit').innerText = netProfitAll.toLocaleString() + " DA";
+
+            const profitStatus = document.getElementById('stat-profit-status');
+            if (netProfitAll > 0) {
+                profitStatus.innerText = "Status: Healthy Profit";
+                profitStatus.className = "text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1";
+            } else if (netProfitAll === 0) {
+                profitStatus.innerText = "Status: Break-Even";
+                profitStatus.className = "text-[11px] font-semibold text-amber-600 dark:text-amber-400 mt-1";
+            } else {
+                profitStatus.innerText = "Status: Operating Loss";
+                profitStatus.className = "text-[11px] font-semibold text-rose-600 dark:text-rose-400 mt-1";
+            }
+
+            // Calculate per company breakdown
+            let companyStats = {};
+            let bestCompany = "--";
+            let maxProfit = -Infinity;
+
+            companies.forEach(comp => {
+                const rev = revMonth.filter(r => r.company === comp).reduce((a,b)=>a+(b.da||0),0);
+                const ownExp = expMonth.filter(e => e.company === comp).reduce((a,b)=>a+(b.totalDa||0),0);
+                const worker = totalMonthlyWorkerCost;
+                const sharedAlloc = totalSharedAll / companies.length;
+                const net = rev - (ownExp + worker + sharedAlloc);
+
+                companyStats[comp] = { rev, ownExp, worker, sharedAlloc, net };
+                if (net > maxProfit) {
+                    maxProfit = net;
+                    bestCompany = comp;
+                }
+            });
+
+            document.getElementById('stat-top-business').innerText = bestCompany;
+
+            // Render Company Cards Grid
+            const grid = document.getElementById('company-cards-grid');
+            grid.innerHTML = companies.map(comp => {
+                const s = companyStats[comp];
+                const isProfitable = s.net >= 0;
+                return `
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-900 dark:text-white text-base">${comp}</h4>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${isProfitable ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300' : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300'}">${isProfitable ? 'PROFIT' : 'LOSS'}</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Revenue:</span><span class="font-semibold text-slate-900 dark:text-slate-100">+${s.rev.toLocaleString()} DA</span></div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Worker Cost:</span><span class="font-semibold text-slate-600 dark:text-slate-400">-${s.worker.toLocaleString()} DA</span></div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Direct Exp:</span><span class="font-semibold text-slate-600 dark:text-slate-400">-${s.ownExp.toLocaleString()} DA</span></div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Shared (1/3):</span><span class="font-semibold text-slate-600 dark:text-slate-400">-${Math.round(s.sharedAlloc).toLocaleString()} DA</span></div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                            <span class="text-xs font-bold uppercase text-slate-400">Net Profit</span>
+                            <span class="text-lg font-black ${isProfitable ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${s.net.toLocaleString()} DA</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            renderCharts(companies, companyStats);
+        }
+
+        function renderCharts(companies, stats) {
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? '#334155' : '#f1f5f9';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            // Revenue vs Expenses Bar Chart
+            const ctx1 = document.getElementById('chartRevenueVsExpense').getContext('2d');
+            if (charts.revExp) charts.revExp.destroy();
+            
+            charts.revExp = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: companies,
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: companies.map(c => stats[c].rev),
+                            backgroundColor: '#22c55e',
+                            borderRadius: 8
+                        },
+                        {
+                            label: 'Total Expenses',
+                            data: companies.map(c => stats[c].ownExp + stats[c].worker + stats[c].sharedAlloc),
+                            backgroundColor: '#f43f5e',
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: textColor } } },
+                    scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, x: { grid: { display: false }, ticks: { color: textColor } } }
+                }
+            });
+
+            // Profit Share Doughnut Chart
+            const ctx2 = document.getElementById('chartProfitShare').getContext('2d');
+            if (charts.profitShare) charts.profitShare.destroy();
+
+            charts.profitShare = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: companies,
+                    datasets: [{
+                        data: companies.map(c => Math.max(0, stats[c].net)),
+                        backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: textColor } } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
