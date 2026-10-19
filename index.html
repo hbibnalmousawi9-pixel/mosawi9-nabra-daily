@@ -287,7 +287,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">USD to DZD Exchange Rate</label>
-                            <input type="number" id="setting-usd-rate" value="135" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                            <input type="number" id="setting-usd-rate" value="260" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Daily Worker Cost per Company (DA)</label>
@@ -456,7 +456,7 @@
             revenue: [],
             expenses: [],
             shared: [],
-            settings: { usdRate: 135, workerCost: 1000, companiesCount: 3 }
+            settings: { usdRate: 260, workerCost: 1000, companiesCount: 3 }
         };
 
         let charts = {};
@@ -518,7 +518,7 @@
             onSnapshot(settingsRef, (docSnap) => {
                 if (docSnap.exists()) {
                     window.appState.settings = docSnap.data();
-                    document.getElementById('setting-usd-rate').value = window.appState.settings.usdRate || 135;
+                    document.getElementById('setting-usd-rate').value = window.appState.settings.usdRate || 260;
                     document.getElementById('setting-worker-cost').value = window.appState.settings.workerCost || 1000;
                     document.getElementById('setting-companies-count').value = window.appState.settings.companiesCount || 3;
                 }
@@ -545,7 +545,6 @@
             refreshUI();
         };
 
-        // Quick Date Range helper
         window.setQuickDateRange = (type) => {
             const now = new Date();
             const year = now.getFullYear();
@@ -599,7 +598,7 @@
             const usd = parseFloat(document.getElementById('input-usd').value) || 0;
             const notes = document.getElementById('input-notes').value || "";
             const company = document.getElementById('input-company').value;
-            const usdRate = window.appState.settings.usdRate || 135;
+            const usdRate = window.appState.settings.usdRate || 260;
 
             let colName = '';
             let payload = {};
@@ -641,7 +640,7 @@
         window.saveSettings = async () => {
             const user = auth.currentUser;
             if (!user) return;
-            const usdRate = parseFloat(document.getElementById('setting-usd-rate').value) || 135;
+            const usdRate = parseFloat(document.getElementById('setting-usd-rate').value) || 260;
             const workerCost = parseFloat(document.getElementById('setting-worker-cost').value) || 1000;
             const companiesCount = parseInt(document.getElementById('setting-companies-count').value) || 3;
 
@@ -761,7 +760,6 @@
             let startInput = document.getElementById('filter-start-date').value;
             let endInput = document.getElementById('filter-end-date').value;
 
-            // Default to current month if not set
             if (!startInput || !endInput) {
                 const now = new Date();
                 const year = now.getFullYear();
@@ -776,11 +774,9 @@
             const startDate = new Date(startInput);
             const endDate = new Date(endInput);
             
-            // Calculate exact elapsed days between start and end date (inclusive)
             const today = new Date();
             today.setHours(0,0,0,0);
 
-            // Effective end date cannot be in the future (avoids charging future worker costs)
             const effectiveEndDate = endDate > today ? (today > startDate ? today : startDate) : endDate;
             
             let diffTime = effectiveEndDate - startDate;
@@ -791,7 +787,6 @@
             const totalWorkerCostPerCompany = businessDaysCount * workerCostPerDay;
             const companies = ['Service 1', 'Service 2', 'Academy'];
 
-            // Filter transactions within Start Date and End Date range
             const revRange = window.appState.revenue.filter(r => r.date && r.date >= startInput && r.date <= endInput);
             const expRange = window.appState.expenses.filter(e => e.date && e.date >= startInput && e.date <= endInput);
             const shaRange = window.appState.shared.filter(s => s.date && s.date >= startInput && s.date <= endInput);
@@ -872,7 +867,6 @@
             const gridColor = isDark ? '#334155' : '#f1f5f9';
             const textColor = isDark ? '#94a3b8' : '#64748b';
 
-            // Revenue vs Expenses Comparison Chart
             const ctx1 = document.getElementById('chartRevenueVsExpense').getContext('2d');
             if (charts.revExp) charts.revExp.destroy();
             
@@ -903,7 +897,6 @@
                 }
             });
 
-            // Net Profit Comparison Between 3 Businesses Chart
             const ctx2 = document.getElementById('chartProfitShare').getContext('2d');
             if (charts.profitShare) charts.profitShare.destroy();
 
