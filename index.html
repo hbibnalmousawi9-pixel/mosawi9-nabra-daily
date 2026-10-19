@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nabra Finance Tracker</title>
+    <!-- Favicon fix -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -57,7 +59,6 @@
 
                 <!-- Auth, Theme Toggle & Profile -->
                 <div class="flex items-center space-x-3">
-                    <!-- Theme Toggle Button -->
                     <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Toggle Light/Dark Theme">
                         <i id="theme-icon" class="fa-solid fa-moon"></i>
                     </button>
@@ -95,15 +96,22 @@
             
             <!-- VIEW: DASHBOARD -->
             <div id="view-dashboard" class="space-y-6">
-                <!-- Month Filter & Overview Bar -->
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <!-- Custom Date Range & Overview Bar -->
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900 dark:text-white">Financial Command Center</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Track profits across Service 1, Service 2, and Academy instantly.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Analyze performance precisely from Start Date to End Date.</p>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Report Month:</label>
-                        <input type="month" id="dash-month" onchange="renderDashboard()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center space-x-2">
+                            <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">From:</label>
+                            <input type="date" id="filter-start-date" onchange="renderDashboard()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">To:</label>
+                            <input type="date" id="filter-end-date" onchange="renderDashboard()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none dark:text-white">
+                        </div>
+                        <button onclick="setQuickDateRange('thisMonth')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-xs font-semibold rounded-xl transition-all">This Month</button>
                     </div>
                 </div>
 
@@ -115,7 +123,7 @@
                             <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-arrow-trend-up"></i></div>
                         </div>
                         <h3 id="stat-total-revenue" class="text-2xl font-black text-slate-900 dark:text-white">0 DA</h3>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">From all 3 businesses combined</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">In selected date range</p>
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
                         <div class="flex items-center justify-between mb-2">
@@ -123,7 +131,7 @@
                             <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center"><i class="fa-solid fa-arrow-trend-down"></i></div>
                         </div>
                         <h3 id="stat-total-expenses" class="text-2xl font-black text-slate-900 dark:text-white">0 DA</h3>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Direct costs + worker + shared</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Direct + Pro-rated worker + Shared</p>
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
                         <div class="flex items-center justify-between mb-2">
@@ -151,13 +159,13 @@
                 <!-- Charts Section -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-4">Revenue vs Expenses by Business</h3>
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-4">Revenue vs Expenses Comparison</h3>
                         <div class="h-64 relative">
                             <canvas id="chartRevenueVsExpense"></canvas>
                         </div>
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-4">Net Profit Distribution</h3>
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-4">Net Profit Comparison Between 3 Businesses</h3>
                         <div class="h-64 relative flex items-center justify-center">
                             <canvas id="chartProfitShare"></canvas>
                         </div>
@@ -403,9 +411,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Your exact Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCvnTyiSaYNxPxTzfFbbG9KAp-7L6M6LaU",
             authDomain: "nabra-dziriya.firebaseapp.com",
@@ -420,7 +427,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Theme Setup
         window.toggleDarkMode = () => {
             const html = document.documentElement;
             const icon = document.getElementById('theme-icon');
@@ -436,7 +442,6 @@
             refreshUI();
         };
 
-        // Initialize Theme from Saved Preference or Default to Light
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
             document.getElementById('theme-icon').className = "fa-solid fa-sun text-amber-400";
@@ -445,7 +450,6 @@
             document.getElementById('theme-icon').className = "fa-solid fa-moon";
         }
 
-        // Global State
         window.appState = {
             currentUser: null,
             currentTab: 'dashboard',
@@ -457,7 +461,6 @@
 
         let charts = {};
 
-        // Expose Firebase tools globally
         window.handleGoogleLogin = async () => {
             const provider = new GoogleAuthProvider();
             try {
@@ -473,7 +476,6 @@
             window.location.reload();
         };
 
-        // Auth Observer
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 window.appState.currentUser = user;
@@ -497,22 +499,21 @@
         }
 
         function initFirestoreListeners(userId) {
-            // Revenue
             onSnapshot(getCollectionPath(userId, 'revenue'), (snapshot) => {
                 window.appState.revenue = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                 refreshUI();
             });
-            // Expenses
+
             onSnapshot(getCollectionPath(userId, 'expenses'), (snapshot) => {
                 window.appState.expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                 refreshUI();
             });
-            // Shared
+
             onSnapshot(getCollectionPath(userId, 'shared'), (snapshot) => {
                 window.appState.shared = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                 refreshUI();
             });
-            // Settings
+
             const settingsRef = doc(db, 'artifacts', 'nabra-finance-v1', 'users', userId, 'config', 'settings');
             onSnapshot(settingsRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -525,7 +526,6 @@
             });
         }
 
-        // Tab Switcher
         window.switchTab = (tabId) => {
             window.appState.currentTab = tabId;
             ['dashboard', 'revenue', 'expenses', 'shared', 'settings'].forEach(t => {
@@ -545,7 +545,20 @@
             refreshUI();
         };
 
-        // Modal Controls
+        // Quick Date Range helper
+        window.setQuickDateRange = (type) => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+
+            if (type === 'thisMonth') {
+                document.getElementById('filter-start-date').value = `${year}-${month}-01`;
+                document.getElementById('filter-end-date').value = `${year}-${month}-${lastDay}`;
+            }
+            renderDashboard();
+        };
+
         window.openModal = (type) => {
             document.getElementById('modal-type').value = type;
             document.getElementById('modal-backdrop').classList.remove('hidden');
@@ -609,7 +622,7 @@
                 closeModal();
             } catch (err) {
                 console.error("Error saving document:", err);
-                alert("Error saving: " + err.message);
+                alert("Error saving transaction: " + err.message);
             }
         };
 
@@ -651,7 +664,6 @@
             downloadAnchor.remove();
         };
 
-        // Database Eraser Modal logic
         window.openDeleteModal = () => {
             document.getElementById('delete-modal-backdrop').classList.remove('hidden');
             document.getElementById('input-confirm-delete').value = '';
@@ -693,7 +705,6 @@
             }
         };
 
-        // Render Tables & Dashboard
         function refreshUI() {
             renderTables();
             if (window.appState.currentTab === 'dashboard') {
@@ -702,7 +713,6 @@
         }
 
         function renderTables() {
-            // Revenue Table
             const revBody = document.getElementById('table-revenue-body');
             revBody.innerHTML = window.appState.revenue.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(r => `
                 <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
@@ -717,7 +727,6 @@
                 </tr>
             `).join('') || `<tr><td colspan="6" class="p-8 text-center text-slate-400">No client payments logged yet.</td></tr>`;
 
-            // Expenses Table
             const expBody = document.getElementById('table-expenses-body');
             expBody.innerHTML = window.appState.expenses.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e => `
                 <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
@@ -733,7 +742,6 @@
                 </tr>
             `).join('') || `<tr><td colspan="7" class="p-8 text-center text-slate-400">No direct business expenses logged yet.</td></tr>`;
 
-            // Shared Table
             const shaBody = document.getElementById('table-shared-body');
             shaBody.innerHTML = window.appState.shared.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(s => `
                 <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
@@ -750,27 +758,48 @@
         }
 
         function renderDashboard() {
-            let monthInput = document.getElementById('dash-month').value;
-            if (!monthInput) {
-                monthInput = new Date().toISOString().slice(0, 7);
-                document.getElementById('dash-month').value = monthInput;
+            let startInput = document.getElementById('filter-start-date').value;
+            let endInput = document.getElementById('filter-end-date').value;
+
+            // Default to current month if not set
+            if (!startInput || !endInput) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+                startInput = `${year}-${month}-01`;
+                endInput = `${year}-${month}-${lastDay}`;
+                document.getElementById('filter-start-date').value = startInput;
+                document.getElementById('filter-end-date').value = endInput;
             }
 
-            const [year, month] = monthInput.split('-');
-            const daysInMonth = new Date(year, month, 0).getDate();
+            const startDate = new Date(startInput);
+            const endDate = new Date(endInput);
+            
+            // Calculate exact elapsed days between start and end date (inclusive)
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            // Effective end date cannot be in the future (avoids charging future worker costs)
+            const effectiveEndDate = endDate > today ? (today > startDate ? today : startDate) : endDate;
+            
+            let diffTime = effectiveEndDate - startDate;
+            let businessDaysCount = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            if (businessDaysCount < 0) businessDaysCount = 0;
+
             const workerCostPerDay = window.appState.settings.workerCost || 1000;
-            const totalMonthlyWorkerCost = daysInMonth * workerCostPerDay;
+            const totalWorkerCostPerCompany = businessDaysCount * workerCostPerDay;
             const companies = ['Service 1', 'Service 2', 'Academy'];
 
-            // Filter data for selected month
-            const revMonth = window.appState.revenue.filter(r => r.date && r.date.startsWith(monthInput));
-            const expMonth = window.appState.expenses.filter(e => e.date && e.date.startsWith(monthInput));
-            const shaMonth = window.appState.shared.filter(s => s.date && s.date.startsWith(monthInput));
+            // Filter transactions within Start Date and End Date range
+            const revRange = window.appState.revenue.filter(r => r.date && r.date >= startInput && r.date <= endInput);
+            const expRange = window.appState.expenses.filter(e => e.date && e.date >= startInput && e.date <= endInput);
+            const shaRange = window.appState.shared.filter(s => s.date && s.date >= startInput && s.date <= endInput);
 
-            let totalRevAll = revMonth.reduce((acc, r) => acc + (r.da || 0), 0);
-            let totalExpDirect = expMonth.reduce((acc, e) => acc + (e.totalDa || 0), 0);
-            let totalSharedAll = shaMonth.reduce((acc, s) => acc + (s.totalDa || 0), 0);
-            let totalWorkerAll = totalMonthlyWorkerCost * companies.length;
+            let totalRevAll = revRange.reduce((acc, r) => acc + (r.da || 0), 0);
+            let totalExpDirect = expRange.reduce((acc, e) => acc + (e.totalDa || 0), 0);
+            let totalSharedAll = shaRange.reduce((acc, s) => acc + (s.totalDa || 0), 0);
+            let totalWorkerAll = totalWorkerCostPerCompany * companies.length;
             
             let totalExpensesAll = totalExpDirect + totalSharedAll + totalWorkerAll;
             let netProfitAll = totalRevAll - totalExpensesAll;
@@ -791,15 +820,14 @@
                 profitStatus.className = "text-[11px] font-semibold text-rose-600 dark:text-rose-400 mt-1";
             }
 
-            // Calculate per company breakdown
             let companyStats = {};
             let bestCompany = "--";
             let maxProfit = -Infinity;
 
             companies.forEach(comp => {
-                const rev = revMonth.filter(r => r.company === comp).reduce((a,b)=>a+(b.da||0),0);
-                const ownExp = expMonth.filter(e => e.company === comp).reduce((a,b)=>a+(b.totalDa||0),0);
-                const worker = totalMonthlyWorkerCost;
+                const rev = revRange.filter(r => r.company === comp).reduce((a,b)=>a+(b.da||0),0);
+                const ownExp = expRange.filter(e => e.company === comp).reduce((a,b)=>a+(b.totalDa||0),0);
+                const worker = totalWorkerCostPerCompany;
                 const sharedAlloc = totalSharedAll / companies.length;
                 const net = rev - (ownExp + worker + sharedAlloc);
 
@@ -812,7 +840,6 @@
 
             document.getElementById('stat-top-business').innerText = bestCompany;
 
-            // Render Company Cards Grid
             const grid = document.getElementById('company-cards-grid');
             grid.innerHTML = companies.map(comp => {
                 const s = companyStats[comp];
@@ -825,7 +852,7 @@
                         </div>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Revenue:</span><span class="font-semibold text-slate-900 dark:text-slate-100">+${s.rev.toLocaleString()} DA</span></div>
-                            <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Worker Cost:</span><span class="font-semibold text-slate-600 dark:text-slate-400">-${s.worker.toLocaleString()} DA</span></div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Worker Cost (${businessDaysCount}d):</span><span class="font-semibold text-slate-600 dark:text-slate-400">-${s.worker.toLocaleString()} DA</span></div>
                             <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Direct Exp:</span><span class="font-semibold text-slate-600 dark:text-slate-400">-${s.ownExp.toLocaleString()} DA</span></div>
                             <div class="flex justify-between text-slate-600 dark:text-slate-400"><span>Shared (1/3):</span><span class="font-semibold text-slate-600 dark:text-slate-400">-${Math.round(s.sharedAlloc).toLocaleString()} DA</span></div>
                         </div>
@@ -845,7 +872,7 @@
             const gridColor = isDark ? '#334155' : '#f1f5f9';
             const textColor = isDark ? '#94a3b8' : '#64748b';
 
-            // Revenue vs Expenses Bar Chart
+            // Revenue vs Expenses Comparison Chart
             const ctx1 = document.getElementById('chartRevenueVsExpense').getContext('2d');
             if (charts.revExp) charts.revExp.destroy();
             
@@ -876,24 +903,26 @@
                 }
             });
 
-            // Profit Share Doughnut Chart
+            // Net Profit Comparison Between 3 Businesses Chart
             const ctx2 = document.getElementById('chartProfitShare').getContext('2d');
             if (charts.profitShare) charts.profitShare.destroy();
 
             charts.profitShare = new Chart(ctx2, {
-                type: 'doughnut',
+                type: 'bar',
                 data: {
                     labels: companies,
                     datasets: [{
-                        data: companies.map(c => Math.max(0, stats[c].net)),
-                        backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b'],
-                        borderWidth: 0
+                        label: 'Net Profit (DA)',
+                        data: companies.map(c => stats[c].net),
+                        backgroundColor: companies.map(c => stats[c].net >= 0 ? '#22c55e' : '#f43f5e'),
+                        borderRadius: 8
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: textColor } } }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: gridColor }, ticks: { color: textColor } }, x: { grid: { display: false }, ticks: { color: textColor } } }
                 }
             });
         }
